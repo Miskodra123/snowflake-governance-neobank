@@ -23,7 +23,7 @@ settings in a user interface. The same scripts can be reviewed, rerun and audite
 
 | Governance need | How it is solved | File | Status |
 |---|---|---|---|
-| Separate zones with the right retention | Transient raw zone, managed-access core and governance zones | `sql/00_setup.sql` | planned |
+| Separate zones with the right retention | Transient raw zone, managed-access core and governance zones | `sql/00_setup.sql` | done |
 | Realistic test data, with known defects | Synthetic customers, accounts, transactions and consents | `sql/01_synthetic_data.sql` | planned |
 | Personal data not spread across tables | Pseudonymisation at ingestion, with a separate mapping table | `sql/02_pseudonymisation.sql` | planned |
 | Access by job, not by person | Role hierarchy: access roles and functional roles | `sql/03_roles.sql` | planned |
