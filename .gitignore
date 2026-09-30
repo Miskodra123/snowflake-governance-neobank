@@ -1,0 +1,24 @@
+private/
+
+# Credentials and keys: never commit
+.env
+*.p8
+*.pem
+*.key
+profiles.yml
+snowflake_config.toml
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
