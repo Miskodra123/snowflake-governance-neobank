@@ -1,4 +1,4 @@
-# Snowflake governance for a neobank
+﻿# Snowflake governance for a neobank
 
 Data governance as code for a fictional neobank on Snowflake: who can see personal data, how it is
 deleted on request, and how critical numbers are checked.
@@ -25,8 +25,8 @@ settings in a user interface. The same scripts can be reviewed, rerun and audite
 |---|---|---|---|
 | Separate zones with the right retention | Transient raw zone, managed-access core and governance zones | `sql/00_setup.sql` | done |
 | Realistic test data, with known defects | Synthetic customers, accounts, transactions and consents | `sql/01_synthetic_data.sql` | done |
-| Personal data not spread across tables | Pseudonymisation at ingestion, with a separate mapping table | `sql/02_pseudonymisation.sql` | planned |
-| Access by job, not by person | Role hierarchy: access roles and functional roles | `sql/03_roles.sql` | planned |
+| Personal data not spread across tables | Pseudonymisation at ingestion, with a separate mapping table | `sql/02_pseudonymisation.sql` | done |
+| Access by job, not by person | Role hierarchy: access roles and functional roles | `sql/03_roles.sql` | done |
 | Know where personal data sits | Object tags and automatic classification of PII | `sql/04_classification.sql` | planned |
 | Only authorised roles see PII | Tag-based masking policies | `sql/05_masking.sql` | planned |
 | Staff see only their own entity's data | Row access policies by legal entity and country | `sql/06_row_access.sql` | planned |
