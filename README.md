@@ -28,7 +28,7 @@ settings in a user interface. The same scripts can be reviewed, rerun and audite
 | Personal data not spread across tables | Pseudonymisation at ingestion, with a separate mapping table | `sql/02_pseudonymisation.sql` | done |
 | Access by job, not by person | Role hierarchy: access roles and functional roles | `sql/03_roles.sql` | done |
 | Know where personal data sits | Object tags and automatic classification of PII | `sql/04_classification.sql` | done |
-| Only authorised roles see PII | Tag-based masking policies | `sql/05_masking.sql` | planned |
+| Only authorised roles see PII | Tag-based masking policies | `sql/05_masking.sql` | done |
 | Staff see only their own entity's data | Row access policies by legal entity and country | `sql/06_row_access.sql` | planned |
 | Critical data is checked automatically | Data metric functions on Critical Data Elements | `sql/07_data_quality.sql` | planned |
 | Right to be forgotten | Erasure procedure on the mapping table | `sql/08_erasure.sql` | planned |
