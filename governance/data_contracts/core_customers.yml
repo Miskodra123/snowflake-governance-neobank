@@ -1,0 +1,72 @@
+# Data contract: core.customers
+#
+# Pseudonymised customer dataset for analytics and entity reporting.
+# Each promise is mapped to the control that enforces it in Snowflake.
+#
+# Promises with a rule id (DQ..) are checked automatically today. allowed_values
+# without a rule id are documented only; they become dbt accepted_values tests
+# in phase 2.
+
+contract: core_customers
+version: 1.0.0
+status: active
+owner: Head of Customer Onboarding
+producer: Customer pipeline (sql/02_pseudonymisation.sql)
+consumers: [Entity reporting, Analytics, Privacy team]
+
+schema:
+  table: neobank.core.customers
+  enforced_by: explicit table definition in sql/02_pseudonymisation.sql (types, NOT NULL)
+  columns:
+    - name: customer_token
+      type: STRING
+      required: true
+      unique: true                             # checked by DQ08
+      note: random UUID, not derived from the customer ID
+    - name: birth_year
+      type: NUMBER(4)
+      note: year only, full date of birth stays in the identity vault
+    - name: country_code
+      type: STRING
+      allowed_values: [DE, FR, ES, IT, NL]
+    - name: legal_entity
+      type: STRING
+      required: true                           # checked by DQ09
+      allowed_values: [NEOBANK_DE, NEOBANK_EU]
+      cde: true
+    - name: kyc_status
+      type: STRING
+      allowed_values: [VERIFIED, PENDING, REJECTED]   # checked by DQ10
+      cde: true
+    - name: onboarded_at
+      type: TIMESTAMP_NTZ
+    - name: closed_at
+      type: TIMESTAMP_NTZ
+      note: NULL while the relationship is active; starts the retention clock
+
+personal_data:
+  direct_identifiers: none                     # names, email, phone, tax ID, address stay in the vault
+  quasi_identifiers: [birth_year, country_code, onboarded_at]
+  note: >
+    Pseudonymised data is still personal data (GDPR Recital 26). Re-identification
+    risk is measured in sql/09_audit_queries.sql (Q8). onboarded_at must not be
+    shared outside the bank at full precision.
+
+quality:
+  enforced_by: governance.dq_rules, logged daily in governance.dq_results
+  rules: [DQ08, DQ09, DQ10]
+
+service_levels:
+  check_schedule: daily at 06:00 UTC
+
+access:
+  enforced_by: role grants (sql/03_roles.sql) and row access policy rap_legal_entity (sql/06_row_access.sql)
+  readers: [FR_ANALYST_DE (NEOBANK_DE rows), FR_ANALYST_EU (NEOBANK_EU rows), FR_DATA_ENGINEER, FR_PRIVACY_OFFICER]
+
+retention:
+  time_travel_days: 7
+  erasure: governance.process_erasure_request (sql/08_erasure.sql)
+
+change_policy: >
+  Adding a column is a minor version. Removing or renaming a column, or changing
+  a type, is a major version and needs sign-off from the consumers listed above.

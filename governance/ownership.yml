@@ -1,0 +1,61 @@
+# Ownership per data product
+#
+# Every table has one accountable business owner (decides who may use the data
+# and what "correct" means), a data steward (keeps definitions and quality rules
+# up to date) and a technical owner (runs the pipeline).
+#
+# The business owner is also set on each table in Snowflake as the tag
+# governance.data_owner (sql/04_classification.sql), so the two never drift.
+
+version: 1
+last_reviewed: 2026-10-01
+
+roles:
+  business_owner: Accountable. Approves access, accepts quality thresholds, signs off changes.
+  data_steward: Maintains definitions, CDE rules and data contracts. First contact for issues.
+  technical_owner: Builds and runs the pipeline. Fixes failed checks.
+
+data_products:
+  - name: Customers
+    tables: [raw.customers, core.customers]
+    business_owner: Head of Customer Onboarding
+    data_steward: KYC data steward
+    technical_owner: Data Platform team (SYSADMIN)
+    contains_personal_data: true
+    contract: data_contracts/core_customers.yml
+
+  - name: Accounts
+    tables: [raw.accounts, core.accounts]
+    business_owner: Head of Retail Banking
+    data_steward: Retail banking data steward
+    technical_owner: Data Platform team (SYSADMIN)
+    contains_personal_data: true   # IBANs in raw
+
+  - name: Transactions
+    tables: [raw.transactions, core.transactions]
+    business_owner: Head of Payments
+    data_steward: Payments data steward
+    technical_owner: Data Platform team (SYSADMIN)
+    contains_personal_data: true   # counterparty names and IBANs in raw
+    contract: data_contracts/core_transactions.yml
+
+  - name: Consents
+    tables: [raw.consents, core.consents]
+    business_owner: Data Protection Officer
+    data_steward: Privacy team
+    technical_owner: Data Platform team (SYSADMIN)
+    contains_personal_data: true
+
+  - name: Identity vault and erasure log
+    tables: [governance.customer_identity, governance.erasure_log]
+    business_owner: Data Protection Officer
+    data_steward: Privacy team
+    technical_owner: Data Platform team (SYSADMIN)
+    contains_personal_data: true
+
+  - name: Governance configuration
+    tables: [governance.pii_access, governance.legal_entity_access, governance.dq_rules, governance.retention_rules]
+    business_owner: Head of Data Governance
+    data_steward: Data governance team (GOVERNANCE_ADMIN)
+    technical_owner: Data Platform team (SYSADMIN)
+    contains_personal_data: false

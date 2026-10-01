@@ -1,0 +1,85 @@
+# Data contract: core.transactions
+#
+# An agreement between the producer (payments pipeline) and its consumers
+# (finance reporting, AML monitoring, analytics). Each promise below is mapped
+# to the technical control that enforces it in Snowflake.
+#
+# Loosely follows the Open Data Contract Standard (ODCS): schema, quality,
+# service levels, access, retention.
+#
+# Promises with a rule id (DQ..) are checked automatically today. allowed_values
+# without a rule id are documented only; they become dbt accepted_values tests
+# in phase 2.
+
+contract: core_transactions
+version: 1.0.0
+status: active
+owner: Head of Payments
+producer: Payments pipeline (sql/02_pseudonymisation.sql)
+consumers: [Finance reporting, AML monitoring, Analytics]
+
+schema:
+  table: neobank.core.transactions
+  enforced_by: explicit table definition in sql/02_pseudonymisation.sql (types, NOT NULL)
+  columns:
+    - name: transaction_id
+      type: STRING
+      required: true
+    - name: account_id
+      type: STRING
+      required: true
+      references: core.accounts.account_id     # checked by DQ05
+    - name: booked_at
+      type: TIMESTAMP_NTZ
+      required: true                           # checked by DQ03
+      cde: true
+    - name: category
+      type: STRING
+      allowed_values: [GROCERIES, RESTAURANTS, TRAVEL, UTILITIES, TRANSFER_OUT, TRANSFER_IN, SALARY]
+    - name: direction
+      type: STRING
+      allowed_values: [DEBIT, CREDIT]
+    - name: channel
+      type: STRING
+      allowed_values: [CARD, DIRECT_DEBIT, SEPA_TRANSFER, SEPA_INSTANT]
+    - name: amount
+      type: NUMBER(12,2)
+      required: true                           # checked by DQ01
+      rule: always positive                    # checked by DQ02
+      cde: true
+    - name: currency
+      type: STRING
+      allowed_values: [EUR]
+    - name: counterparty_type
+      type: STRING
+      allowed_values: [MERCHANT, EMPLOYER, PERSON]
+    - name: counterparty_name
+      type: STRING
+      rule: NULL when counterparty_type = PERSON (data minimisation)
+    - name: legal_entity
+      type: STRING
+      allowed_values: [NEOBANK_DE, NEOBANK_EU]
+
+personal_data:
+  direct_identifiers: none                     # IBANs and names of private persons stay in raw
+  pseudonymous_key: account_id -> core.accounts.customer_token
+
+quality:
+  enforced_by: governance.dq_rules, logged daily in governance.dq_results
+  rules: [DQ01, DQ02, DQ03, DQ04, DQ05]
+
+service_levels:
+  freshness: loaded within 24 hours            # DQ04
+  check_schedule: daily at 06:00 UTC           # task governance.daily_dq_checks
+
+access:
+  enforced_by: role grants (sql/03_roles.sql) and row access policy rap_legal_entity (sql/06_row_access.sql)
+  readers: [FR_ANALYST_DE (NEOBANK_DE rows), FR_ANALYST_EU (NEOBANK_EU rows), FR_DATA_ENGINEER, FR_PRIVACY_OFFICER]
+
+retention:
+  time_travel_days: 7
+  erasure: rows deleted by governance.process_erasure_request when the customer's retention ends
+
+change_policy: >
+  Adding a column is a minor version. Removing or renaming a column, or changing
+  a type, is a major version and needs sign-off from the consumers listed above.

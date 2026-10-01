@@ -1,0 +1,121 @@
+# Critical Data Element (CDE) register
+#
+# A CDE is a data element whose errors would cause wrong regulatory reports,
+# wrong risk figures or harm to customers. Each one has a business definition,
+# an accountable owner and quality rules with thresholds.
+#
+# The rules below are enforced in Snowflake:
+#   - rule ids match governance.dq_rules (sql/07_data_quality.sql)
+#   - results are logged daily in governance.dq_results
+#   - CDE columns carry the tag governance.cde = 'YES' (sql/04_classification.sql)
+
+version: 1
+last_reviewed: 2026-10-01
+
+cdes:
+  - name: Transaction amount
+    location: core.transactions.amount
+    definition: >
+      Value of a booked transaction in its currency, always positive.
+      Whether money left or entered the account is given by `direction`.
+    owner: Head of Payments
+    used_in: [liquidity reporting, AML transaction monitoring, customer statements]
+    rules:
+      - id: DQ01
+        dimension: Completeness
+        check: No missing amounts
+        threshold: 0
+      - id: DQ02
+        dimension: Validity
+        check: No negative amounts
+        threshold: 0
+
+  - name: Booking date
+    location: core.transactions.booked_at
+    definition: Date and time the transaction was booked on the account.
+    owner: Head of Payments
+    used_in: [period-end reporting, statements]
+    rules:
+      - id: DQ03
+        dimension: Completeness
+        check: No missing booking dates
+        threshold: 0
+
+  - name: Transactions (dataset)
+    location: core.transactions
+    definition: The full set of booked transactions.
+    owner: Head of Payments
+    rules:
+      - id: DQ04
+        dimension: Timeliness
+        check: Loaded within the last 24 hours (SLA)
+        threshold: 24 hours
+      - id: DQ05
+        dimension: Consistency
+        check: Every transaction belongs to a known account
+        threshold: 0
+
+  - name: Account status
+    location: core.accounts.status
+    definition: OPEN or CLOSED. Drives which accounts are reported as active.
+    owner: Head of Retail Banking
+    used_in: [deposit reporting, customer counts]
+    rules:
+      - id: DQ06
+        dimension: Completeness
+        check: No missing account status
+        threshold: 0
+
+  - name: Account ID
+    location: core.accounts.account_id
+    definition: Internal unique identifier of an account.
+    owner: Head of Retail Banking
+    rules:
+      - id: DQ07
+        dimension: Uniqueness
+        check: No duplicate account IDs
+        threshold: 0
+
+  - name: Customer token
+    location: core.customers.customer_token
+    definition: Pseudonymous key for a customer. Links core data to the identity vault.
+    owner: Data Protection Officer
+    rules:
+      - id: DQ08
+        dimension: Uniqueness
+        check: No duplicate customer tokens
+        threshold: 0
+
+  - name: Customer legal entity
+    location: core.customers.legal_entity
+    definition: >
+      The legal entity that holds the customer relationship (NEOBANK_DE or NEOBANK_EU).
+      Decides which entity reports the customer and who may see the row.
+    owner: Head of Customer Onboarding
+    used_in: [entity-level regulatory reporting, row access policy]
+    rules:
+      - id: DQ09
+        dimension: Completeness
+        check: No missing legal entity
+        threshold: 0
+
+  - name: KYC status
+    location: core.customers.kyc_status
+    definition: Outcome of identity verification. Allowed values VERIFIED, PENDING, REJECTED.
+    owner: Head of Customer Onboarding
+    used_in: [AML controls, onboarding reporting]
+    rules:
+      - id: DQ10
+        dimension: Validity
+        check: Only allowed KYC status values
+        threshold: 0
+
+  - name: Customer email
+    location: governance.customer_identity.email
+    definition: Contact address for statutory customer notices.
+    owner: Data Protection Officer
+    rules:
+      - id: DQ11
+        dimension: Completeness
+        check: At most 0.5% of customers without email
+        threshold: 0.5 percent
