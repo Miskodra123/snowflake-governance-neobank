@@ -29,7 +29,7 @@ settings in a user interface. The same scripts can be reviewed, rerun and audite
 | Access by job, not by person | Role hierarchy: access roles and functional roles | `sql/03_roles.sql` | done |
 | Know where personal data sits | Object tags and automatic classification of PII | `sql/04_classification.sql` | done |
 | Only authorised roles see PII | Tag-based masking policies | `sql/05_masking.sql` | done |
-| Staff see only their own entity's data | Row access policies by legal entity and country | `sql/06_row_access.sql` | planned |
+| Staff see only their own entity's data | Row access policies by legal entity | `sql/06_row_access.sql` | done |
 | Critical data is checked automatically | Data metric functions on Critical Data Elements | `sql/07_data_quality.sql` | planned |
 | Right to be forgotten | Erasure procedure on the mapping table | `sql/08_erasure.sql` | planned |
 | Evidence for auditors | Queries on access history and on who can see PII | `sql/09_audit_queries.sql` | planned |
