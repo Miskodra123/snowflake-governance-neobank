@@ -129,9 +129,12 @@ GRANT APPLY TAG                ON ACCOUNT TO ROLE governance_admin;
 GRANT APPLY MASKING POLICY     ON ACCOUNT TO ROLE governance_admin;
 GRANT APPLY ROW ACCESS POLICY  ON ACCOUNT TO ROLE governance_admin;
 
--- Read-only access to Snowflake's governance views (access history, policy and
--- tag references, grants). GOVERNANCE_VIEWER is narrower than all of ACCOUNT_USAGE.
+-- Read-only access to Snowflake's governance views. These database roles are
+-- narrower than all of ACCOUNT_USAGE:
+--   GOVERNANCE_VIEWER  access history, policy and tag references
+--   SECURITY_VIEWER    grants to roles and users, login history
 GRANT DATABASE ROLE SNOWFLAKE.GOVERNANCE_VIEWER TO ROLE fr_auditor;
+GRANT DATABASE ROLE SNOWFLAKE.SECURITY_VIEWER   TO ROLE fr_auditor;
 GRANT DATABASE ROLE SNOWFLAKE.GOVERNANCE_VIEWER TO ROLE governance_admin;
 
 -- Data quality (07): SYSADMIN owns the tables, so it attaches the data metric

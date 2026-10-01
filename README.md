@@ -32,7 +32,7 @@ settings in a user interface. The same scripts can be reviewed, rerun and audite
 | Staff see only their own entity's data | Row access policies by legal entity | `sql/06_row_access.sql` | done |
 | Critical data is checked automatically | Data metric functions on Critical Data Elements | `sql/07_data_quality.sql` | done |
 | Right to be forgotten | Erasure procedure on the mapping table | `sql/08_erasure.sql` | done |
-| Evidence for auditors | Queries on access history and on who can see PII | `sql/09_audit_queries.sql` | planned |
+| Evidence for auditors | Queries on access history and on who can see PII | `sql/09_audit_queries.sql` | done |
 | Critical Data Elements have owners and rules | CDE register and ownership file | `governance/*.yml` | planned |
 | Producers and consumers agree on the data | Data contracts in YAML | `governance/data_contracts/` | planned |
 
